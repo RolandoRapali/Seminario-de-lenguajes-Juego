@@ -32,6 +32,22 @@ def  draw_shield_bar(surface, x, y, percentage):
     fill = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surface, GREEN, fill)
     pygame.draw.rect(surface, WHITE, border, 2)
+ 
+def pause():
+    pausado = True
+
+    while pausado:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    pausado = False
+
+    
 
 #------------------------------------------------------------------------------------------------------------------------    
 class Player(pygame.sprite.Sprite):
@@ -61,14 +77,15 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
+
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
-        if self.rect.bottom > HEIGHT:
+        if self.rect.bottom >= HEIGHT:
             self.rect.bottom = HEIGHT
-        if self.rect.bottom < 0:
-            self.rect.bottom = 0
+        if self.rect.bottom < 120:
+            self.rect.bottom = 120
  
             
     def shoot(self):
@@ -223,7 +240,12 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 player.shoot()
-            
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                pause()
+
+
     all_sprites.update()
     
     #colisiones meteoro en lase
