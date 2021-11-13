@@ -249,6 +249,8 @@ while running:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
+                draw_text(screen, "Juego en pausa, presione C para seguir jugando", 25, WIDTH/2, HEIGHT/2 - 50)
+                pygame.display.update()
                 pause()
 
 
@@ -259,7 +261,7 @@ while running:
     for hit in hits:
         score += 10
 
-        if score == level * 500:
+        if score == level * 1000:
             level += 1
             if player.shield != player.full_shield:
                 if player.full_shield - player.shield < 25:
