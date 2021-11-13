@@ -60,7 +60,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10
         self.speed_x = 0
         self.speed_y = 0
-        self.shield = 100
+        self.full_shield = 100
+        self.shield = self.full_shield
         
     def update(self):
         self.speed_x = 0
@@ -139,27 +140,27 @@ class Bullet(pygame.sprite.Sprite):
         
 #------------------------------------------------------------------------------------------------------------------------
 class Explosion(pygame.sprite.Sprite):
-	def __init__(self, center):
-		super().__init__()
-		self.image = explosion_anim[0]
-		self.rect = self.image.get_rect()
-		self.rect.center = center
-		self.frame = 0
-		self.last_update = pygame.time.get_ticks()
-		self.frame_rate = 50 # how long to wait for the next frame VELOCITY OF THE EXPLOSION
+    def __init__(self, center):
+        super().__init__()
+        self.image = explosion_anim[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50 # how long to wait for the next frame VELOCITY OF THE EXPLOSION
 
-	def update(self):
-		now = pygame.time.get_ticks()
-		if now - self.last_update > self.frame_rate:
-			self.last_update = now
-			self.frame += 1
-			if self.frame == len(explosion_anim):
-				self.kill() # if we get to the end of the animation we don't keep going.
-			else:
-				center = self.rect.center
-				self.image = explosion_anim[self.frame]
-				self.rect = self.image.get_rect()
-				self.rect.center = center
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == len(explosion_anim):
+                self.kill() # if we get to the end of the animation we don't keep going.
+            else:
+                center = self.rect.center
+                self.image = explosion_anim[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
  
 #------------------------------------------------------------------------------------------------------------------------               
 def show_go_screen():
@@ -181,10 +182,10 @@ def show_go_screen():
 #creo meteoros de distintos tamaños
 meteor_images = []
 meteor_list = ["meteorGrey_big1.png", "meteorGrey_big2.png", "meteorGrey_big3.png", "meteorGrey_big4.png",
-				"meteorGrey_med1.png", "meteorGrey_med2.png", "meteorGrey_small1.png", "meteorGrey_small2.png",
-				"meteorGrey_tiny1.png", "meteorGrey_tiny2.png"]
+                "meteorGrey_med1.png", "meteorGrey_med2.png", "meteorGrey_small1.png", "meteorGrey_small2.png",
+                "meteorGrey_tiny1.png", "meteorGrey_tiny2.png"]
 for img in meteor_list:
-	meteor_images.append(pygame.image.load(img).convert())
+    meteor_images.append(pygame.image.load(img).convert())
     
 #crear animacion de explociones
 explosion_anim = []
@@ -226,12 +227,17 @@ while running:
         
         player = Player()
         all_sprites.add(player)
+        
+        score = 0
+        level = 1
+
         for i in range(8):
             create_meteor()
         
-        score = 0
-        
     clock.tick(60)
+
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_over = True
@@ -252,6 +258,16 @@ while running:
     hits = pygame.sprite.groupcollide(meteor_list, bullets, True, True)
     for hit in hits:
         score += 10
+
+        if score == level * 500:
+            level += 1
+            if player.shield != player.full_shield:
+                if player.full_shield - player.shield < 25:
+                    player.shield += player.full_shield - player.shield
+            
+                if player.full_shield - player.shield >= 25:
+                    player.shield += 25
+
         explosion_sound.play()
         explosion = Explosion(hit.rect.center)
         all_sprites.add(explosion)
@@ -261,7 +277,7 @@ while running:
     # checar colisiones - jugador - meteoro
     hits = pygame.sprite.spritecollide(player, meteor_list,  True)
     for hit in hits:
-        player.shield -= 25
+        player.shield -= 5 * level
         create_meteor()
         if player.shield <= 0:
             game_over = True
@@ -272,7 +288,8 @@ while running:
     all_sprites.draw(screen)
     
     #marcador
-    draw_text(screen, str(score), 25, WIDTH // 2, 10)
+    sTexto = "Puntos: " + str(score) + " --- Nivel: " + str(level)
+    draw_text(screen, sTexto, 25, WIDTH // 2, 10)
     
     #escudo
     draw_shield_bar(screen, 5, 5, player.shield)
